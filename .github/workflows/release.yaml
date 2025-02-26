@@ -1,0 +1,51 @@
+name: 'Release'
+
+on: 
+  push:
+    branches:
+      - master
+
+jobs:
+  publish_nuget:
+    name: 'Publish nuget'
+    runs-on: ['azure-identity']
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Setup Dotnet
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: '8.0.x'
+    
+    - name: Setup Node
+      uses: actions/setup-node@v3
+      with:
+        node-version: 16
+
+    - name: Bump version and push tag
+      id: tag_version
+      uses: mathieudutour/github-tag-action@v6.0
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Add nuget source
+      run: dotnet nuget add source --username lucas-s-rodrigues --password ${{ secrets.GH_AUTOMATION_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/stefanini-applications/index.json"
+
+    - name: Build project
+      run: dotnet build src/SAI.App.GitHub.csproj -c Release -p:Version=${{ steps.tag_version.outputs.new_version }}
+    
+    - name: Publish nuget
+      uses: tanaka-takayoshi/nuget-publish-to-github-packages-action@v2.1
+      with:
+        nupkg-path:  './src/bin/Release/*.nupkg'
+        repo-owner:  'stefanini-applications'
+        gh-user:  'lucas-s-rodrigues'
+        token:  ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ steps.tag_version.outputs.new_tag }}
+        name: Release ${{ steps.tag_version.outputs.new_tag }}
