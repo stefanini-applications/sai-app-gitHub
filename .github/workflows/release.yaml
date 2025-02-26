@@ -31,7 +31,7 @@ jobs:
         github_token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Add nuget source
-      run: dotnet nuget add source --username lucas-s-rodrigues --password ${{ secrets.GH_AUTOMATION_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/stefanini-applications/index.json"
+      run: dotnet nuget add source --username rljunior3 --password ${{ secrets.GH_AUTOMATION_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/stefanini-applications/index.json"
 
     - name: Build project
       run: dotnet build src/SAI.App.GitHub.csproj -c Release -p:Version=${{ steps.tag_version.outputs.new_version }}
@@ -41,7 +41,7 @@ jobs:
       with:
         nupkg-path:  './src/bin/Release/*.nupkg'
         repo-owner:  'stefanini-applications'
-        gh-user:  'lucas-s-rodrigues'
+        gh-user:  'rljunior3'
         token:  ${{ secrets.GITHUB_TOKEN }}
 
     - name: Release
